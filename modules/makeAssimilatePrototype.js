@@ -13,12 +13,14 @@ module.exports = function makeAssimilatePrototype() {
     if (typeof descriptor[descKey] === 'function') {
       descriptor[descKey] = function (firstArgument) {
         var storedDescriptor = Object.getOwnPropertyDescriptor(storedPrototype, key);
-        if (typeof storedDescriptor[descKey] === 'function') {
-          return storedDescriptor[descKey].apply(this, arguments);
-        } else if (descKey === 'get') {
-          return this[key];
-        } else if (descKey === 'set') {
-          this[key] = firstArgument;
+        if (storedDescriptor) {
+          if (typeof storedDescriptor[descKey] === 'function') {
+            return storedDescriptor[descKey].apply(this, arguments);
+          } else if (descKey === 'get') {
+            return this[key];
+          } else if (descKey === 'set') {
+            this[key] = firstArgument;
+          }
         }
       };
     }
