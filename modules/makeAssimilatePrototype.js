@@ -9,39 +9,47 @@ module.exports = function makeAssimilatePrototype() {
   var storedPrototype,
       knownPrototypes = [];
 
-  function wrapMethod(key) {
-    return function () {
-      if (storedPrototype[key]) {
-        return storedPrototype[key].apply(this, arguments);
-      }
-    };
+  function wrapMethod(key, descriptor, descKey) {
+    if (typeof descriptor[descKey] === 'function') {
+      descriptor[descKey] = function (firstArgument) {
+        var storedDescriptor = Object.getOwnPropertyDescriptor(storedPrototype, key);
+        if (storedDescriptor) {
+          if (typeof storedDescriptor[descKey] === 'function') {
+            return storedDescriptor[descKey].apply(this, arguments);
+          } else if (descKey === 'get') {
+            return this[key];
+          } else if (descKey === 'set') {
+            this[key] = firstArgument;
+          }
+        }
+      };
+    }
   }
 
   function patchProperty(proto, key) {
-    proto[key] = storedPrototype[key];
+    var descriptor = Object.getOwnPropertyDescriptor(storedPrototype, key);
 
-    if (typeof proto[key] !== 'function' ||
-      key === 'type' ||
-      key === 'constructor') {
-      return;
+    if ((descriptor.get || descriptor.set || typeof descriptor.value === 'function') &&
+      key !== 'type' &&
+      key !== 'constructor') {
+
+      wrapMethod(key, descriptor, 'get');
+      wrapMethod(key, descriptor, 'set');
+      wrapMethod(key, descriptor, 'value');
+
+      if (proto.__reactAutoBindMap && proto.__reactAutoBindMap[key]) {
+        proto.__reactAutoBindMap[key] = proto[key];
+      }
     }
 
-    proto[key] = wrapMethod(key);
-
-    if (storedPrototype[key].isReactClassApproved) {
-      proto[key].isReactClassApproved = storedPrototype[key].isReactClassApproved;
-    }
-
-    if (proto.__reactAutoBindMap && proto.__reactAutoBindMap[key]) {
-      proto.__reactAutoBindMap[key] = proto[key];
-    }
+    Object.defineProperty(proto, key, descriptor);
   }
 
   function updateStoredPrototype(freshPrototype) {
     storedPrototype = {};
 
     Object.getOwnPropertyNames(freshPrototype).forEach(function (key) {
-      storedPrototype[key] = freshPrototype[key];
+      Object.defineProperty(storedPrototype, key, Object.getOwnPropertyDescriptor(freshPrototype, key));
     });
   }
 
