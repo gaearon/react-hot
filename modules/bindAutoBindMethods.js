@@ -46,6 +46,9 @@ function bindAutoBindMethod(component, method) {
  * Based on https://github.com/facebook/react/blob/master/src/classic/class/ReactClass.js#L639-L685.
  */
 module.exports = function bindAutoBindMethods(component) {
+  
+  component = component._instance || component;
+  
   for (var autoBindKey in component.__reactAutoBindMap) {
     if (!component.__reactAutoBindMap.hasOwnProperty(autoBindKey)) {
       continue;
