@@ -31,8 +31,8 @@ function getPrototype(ReactClass) {
  * Returns a function that will patch React class with new versions of itself
  * on subsequent invocations. Both legacy and ES6 style classes are supported.
  */
-module.exports = function makePatchReactClass(getRootInstances, React) {
-  var assimilatePrototype = makeAssimilatePrototype(React),
+module.exports = function makePatchReactClass(getRootInstances, React, options) {
+  var assimilatePrototype = makeAssimilatePrototype(React, options),
       FirstClass = null;
 
   return function patchReactClass(NextClass) {

@@ -6,7 +6,7 @@ var makePatchReactClass = require('./makePatchReactClass');
  * Returns a function that, when invoked, patches a React class with a new
  * version of itself. To patch different classes, pass different IDs.
  */
-module.exports = function makeMakeHot(getRootInstances, React) {
+module.exports = function makeMakeHot(getRootInstances, React, options) {
   if (typeof getRootInstances !== 'function') {
     throw new Error('Expected getRootInstances to be a function.');
   }
@@ -26,7 +26,7 @@ module.exports = function makeMakeHot(getRootInstances, React) {
     }
 
     if (!patchers[persistentId]) {
-      patchers[persistentId] = makePatchReactClass(getRootInstances, React);
+      patchers[persistentId] = makePatchReactClass(getRootInstances, React, options);
     }
 
     var patchReactClass = patchers[persistentId];
