@@ -17,10 +17,17 @@ module.exports = function makeAssimilatePrototype() {
     };
   }
 
-  function patchProperty(proto, key) {
-    proto[key] = storedPrototype[key];
+  function copyProperty(source, target, name) {
+    var descriptor = Object.getOwnPropertyDescriptor(source, name);
+    Object.defineProperty(target, name, descriptor);
+    return descriptor;
+  }
 
-    if (typeof proto[key] !== 'function' ||
+  function patchProperty(proto, key) {
+    var descriptor = copyProperty(storedPrototype, proto, key);
+
+    if (!descriptor.value ||
+      typeof proto[key] !== 'function' ||
       key === 'type' ||
       key === 'constructor') {
       return;
@@ -41,7 +48,7 @@ module.exports = function makeAssimilatePrototype() {
     storedPrototype = {};
 
     Object.getOwnPropertyNames(freshPrototype).forEach(function (key) {
-      storedPrototype[key] = freshPrototype[key];
+      copyProperty(freshPrototype, storedPrototype, key);
     });
   }
 
