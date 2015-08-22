@@ -10,11 +10,15 @@ module.exports = function makeAssimilatePrototype() {
       knownPrototypes = [];
 
   function wrapMethod(key) {
-    return function () {
+    var wrappedMethods = function() {
       if (storedPrototype[key]) {
         return storedPrototype[key].apply(this, arguments);
       }
     };
+    wrappedMethods.toString = function() {
+      return storedPrototype[key].toString();
+    };
+    return wrappedMethods;
   }
 
   function patchProperty(proto, key) {
