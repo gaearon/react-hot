@@ -10,15 +10,18 @@ var getForceUpdate = require('react-proxy').getForceUpdate;
 function makePatchReactClass(React) {
   var forceUpdate = getForceUpdate(React);
   var proxy;
+  var canUpdate = typeof requestAnimationFrame === 'function';
 
   return function patchReactClass(NextClass) {
     if (!proxy) {
       proxy = createProxy(NextClass);
     } else {
       var mountedInstances = proxy.update(NextClass);
-      requestAnimationFrame(function () {
-        mountedInstances.forEach(forceUpdate);
-      });
+      if (canUpdate && mountedInstances.length > 0) {
+        requestAnimationFrame(function () {
+          mountedInstances.forEach(forceUpdate);
+        });
+      }
     }
 
     return proxy.get();
