@@ -32,7 +32,7 @@ function getPrototype(ReactClass) {
  * on subsequent invocations. Both legacy and ES6 style classes are supported.
  */
 module.exports = function makePatchReactClass(getRootInstances, React) {
-  var assimilatePrototype = makeAssimilatePrototype(),
+  var assimilatePrototype = makeAssimilatePrototype(React),
       FirstClass = null;
 
   return function patchReactClass(NextClass) {

@@ -5,11 +5,41 @@
  * as the "source of truth" and patches its methods on subsequent invocations,
  * also patching current and previous prototypes to forward calls to it.
  */
-module.exports = function makeAssimilatePrototype() {
+module.exports = function makeAssimilatePrototype(React) {
   var storedPrototype,
       knownPrototypes = [];
 
   function wrapMethod(key) {
+    if (key === 'render') {
+      return function render() {
+        try {
+          if (storedPrototype[key]) {
+            return storedPrototype[key].apply(this, arguments);
+          }
+        } catch (err) {
+          console.error(err);
+          return React.createElement('div', {
+            style: {
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'red',
+              opacity: 0.6,
+              fontSize: 18,
+              color: 'white',
+              textAlign: 'center',
+              padding: 40,
+              display: 'table'
+            }
+          }, React.createElement('span', {
+            style: {
+              display: 'table-cell',
+              verticalAlign: 'middle'
+            }
+          }, err.toString()));
+        }
+      };
+    }
+
     return function () {
       if (storedPrototype[key]) {
         return storedPrototype[key].apply(this, arguments);
